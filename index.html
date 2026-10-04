@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!-- ==========================================================================
+  index.html — THE SKELETON 🦴
+  --------------------------------------------------------------------------
+  HTML says WHAT exists on the page: a heading, a search box, a button, a list.
+  It says nothing about how things look (that's styles.css) or how they behave
+  (that's app.js).
+
+  Notice the order at the bottom of this file — it matters:
+    1. data.js    (facts first)
+    2. app.js     (logic, which needs the facts)
+  A browser reads files top to bottom. If app.js loaded before data.js,
+  app.js would look for PLACES, find nothing, and crash.
+  ========================================================================== -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RideWise — Compare ride prices</title>
+
+  <!-- The clothes. One line, that's it. -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+<div class="wrap">
+
+  <h1>🛺 RideWise</h1>
+  <div class="sub">Type A and B once. See every app's price side by side. Log what you really paid, and the app learns.</div>
+
+  <!-- A notice we can change from JS. id lets app.js find it. -->
+  <div class="banner" id="memoryNotice">
+    ⚠️ <b>These are estimates</b>, built from rough rate cards — not live prices from
+    the apps. Uber, Ola and Rapido don't share live fares with outside apps.
+    Tap "Log real price" after your ride and these estimates get sharper every time.
+  </div>
+
+  <!-- ================= INPUT AREA ================= -->
+  <div class="card">
+    <!-- role / aria-* attributes tell screen readers "this is a search box with a list" -->
+    <label for="fromInput">📍 Pickup (A)</label>
+    <div class="search-box">
+      <input type="text" id="fromInput" placeholder="Search pickup location…" autocomplete="off"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromSuggest" />
+      <button type="button" class="locate-btn" id="locateBtn" title="Use my current location" aria-label="Use my current location">◎</button>
+      <div class="suggestions" id="fromSuggest" role="listbox"></div>
+    </div>
+
+    <button type="button" class="swap-btn" id="swapBtn" title="Swap A and B">⇅ Swap</button>
+
+    <label for="toInput">🎯 Drop (B)</label>
+    <div class="search-box">
+      <input type="text" id="toInput" placeholder="Where to?" autocomplete="off"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toSuggest" />
+      <div class="suggestions" id="toSuggest" role="listbox"></div>
+    </div>
+
+    <label class="surge-label" for="surge">
+      🚦 Surge / demand: <span class="surge-value" id="surgeValue">1.1×</span>
+    </label>
+    <input type="range" id="surge" min="0.8" max="2.5" step="0.1" value="1.1" />
+    <div class="hint">Slide it to pretend it's raining. Watch the ranking change.</div>
+
+    <button class="go" id="compareBtn">Compare prices →</button>
+  </div>
+
+  <!-- ================= RESULTS (filled by app.js) ================= -->
+  <div id="results"></div>
+
+  <!-- ================= YOUR PRICE LOG ================= -->
+  <div class="card" id="logCard">
+    <div class="section-title">📒 My price log</div>
+    <div class="stats" id="logStats">No trips logged yet. After a ride, tap “Log real price” on the option you took.</div>
+    <div id="logList"></div>
+    <button class="danger hidden" id="clearBtn">Delete all logged trips</button>
+  </div>
+
+  <!-- ================= THE "WHY" PANEL ================= -->
+  <details class="card">
+    <summary>🧠 How does this math work?</summary>
+    <p>
+      Every app charges roughly: <b>base fare + (₹/km × km) + (₹/min × min)</b>, with a
+      minimum floor, times a surge multiplier during rush hour.
+    </p>
+    <ol>
+      <li><b>Finding places:</b> ⭐ popular places come from <code>data.js</code> instantly.
+          📍 Any other address is looked up on OpenStreetMap (free), which gives us its
+          latitude/longitude.</li>
+      <li><b>Distance:</b> the "haversine" formula gives straight-line km between A and B,
+          then we multiply by a detour factor (<code>ROAD_FACTOR</code>, roads bend).</li>
+      <li><b>Time:</b> we guess city traffic speed from the distance (~12–26 km/h).</li>
+      <li><b>Rate card:</b> the ₹ numbers in <code>data.js</code>. Metered autos add a
+          night charge between midnight and 5 AM.</li>
+      <li><b>Learning:</b> every real price you log is compared with what the raw formula
+          predicted (surge removed). With 2 or more logs for the same app+vehicle, we compute
+          how wrong the formula usually is and quietly correct future estimates.</li>
+    </ol>
+  </details>
+
+</div>
+
+<!-- Load order matters: facts → logic -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

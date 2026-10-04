@@ -1,0 +1,541 @@
+/* ==========================================================================
+   styles.css — THE CLOTHES 👕
+   --------------------------------------------------------------------------
+   CSS answers: "how does it look?" Colour, size, spacing, borders, roundness.
+
+   How CSS works: pick a target (a "selector"), then list properties in { }.
+       .card { border-radius: 16px; }  → round the corners of class="card"
+       #from                           → one unique element with id="from"
+
+   NEW IDEA — CSS VARIABLES (the :root block below):
+   We name every colour ONCE, e.g. --accent, and use it everywhere with
+   var(--accent). Want a blue app instead of orange? Change one line.
+
+   File map:
+     1. Variables (theme)      6. Result rows
+     2. Base / page            7. Buttons
+     3. Cards & text           8. Log form & price log
+     4. Inputs & search box    9. "How it works" panel
+     5. Banner                10. Helpers, animations, accessibility
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. VARIABLES — the whole theme in one place 🎨
+   ========================================================================== */
+:root {
+  /* backgrounds, darkest → lightest */
+  --bg:          #0b0e13;
+  --surface:     #151a22;
+  --surface-2:   #1c232d;
+  --surface-3:   #252e3a;
+  --border:      #26303c;
+  --border-soft: #1f2731;
+
+  /* text */
+  --text:        #eef2f6;
+  --text-dim:    #9aa7b6;
+  --text-faint:  #6b7786;
+
+  /* brand + status colours */
+  --accent:      #ff7a18;
+  --accent-2:    #ffb347;
+  --accent-ink:  #1a1208;     /* text ON the orange button */
+  --good:        #4ade80;
+  --bad:         #ff8a8a;
+  --warn:        #ffd479;
+  --brain:       #c8a2ff;     /* purple = "the app learned this" */
+
+  /* shape + motion */
+  --radius-lg:   16px;
+  --radius:      12px;
+  --radius-sm:   9px;
+  --shadow:      0 8px 24px rgba(0, 0, 0, .35);
+  --shadow-pop:  0 14px 40px rgba(0, 0, 0, .55);
+  --speed:       .18s;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+}
+
+
+/* ==========================================================================
+   2. BASE — page-wide rules
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }   /* padding behaves sanely */
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  line-height: 1.45;
+  padding: 20px 16px 48px;
+  /* soft orange glow at the top — a subtle "premium" touch */
+  background:
+    radial-gradient(900px 380px at 50% -120px, rgba(255, 122, 24, .14), transparent 70%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;   /* no grey flash on phone taps */
+}
+
+.wrap { max-width: 560px; margin: 0 auto; }   /* centred, phone-friendly column */
+
+h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  margin: 4px 0 4px;
+}
+.sub { color: var(--text-dim); font-size: 14px; margin-bottom: 18px; }
+
+b { font-weight: 700; }
+
+
+/* ==========================================================================
+   3. CARDS & TEXT
+   ========================================================================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.section-title { font-weight: 800; font-size: 16px; margin-bottom: 8px; }
+
+.stats { color: var(--text-dim); font-size: 13px; margin-bottom: 10px; }
+.stats b { color: var(--text); }
+
+.route-title { font-weight: 700; font-size: 15.5px; }
+.route-stats { margin: 4px 0 0; }
+
+.hint { color: var(--text-faint); font-size: 12px; margin-top: 6px; }
+.warn-text { color: var(--warn); }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+
+/* ==========================================================================
+   4. INPUTS & LOCATION SEARCH 🔍
+   ========================================================================== */
+button, input, select { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* --- the A and B search boxes --- */
+.search-box { position: relative; margin-bottom: 12px; }
+
+.search-box input {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 48px 13px 14px;
+  font-size: 15.5px;              /* ≥16px-ish stops iPhone zooming in */
+  transition: border-color var(--speed), box-shadow var(--speed);
+}
+.search-box input::placeholder { color: var(--text-faint); }
+.search-box input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 122, 24, .16);   /* glowing focus ring */
+}
+
+/* ◎ "use my location" button, sitting inside the pickup box */
+.locate-btn {
+  position: absolute;
+  right: 7px; top: 7px;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  background: var(--surface-3);
+  color: var(--accent-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  transition: background var(--speed), transform var(--speed);
+}
+.locate-btn:hover { background: #2f3a48; }
+.locate-btn:active { transform: scale(.92); }
+
+/* the dropdown list of suggestions */
+.suggestions {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  display: none;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  overscroll-behavior: contain;   /* scrolling the list won't scroll the page */
+}
+.suggestions.open { display: block; animation: drop-in .14s ease-out; }
+
+.sugg {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background var(--speed);
+}
+.sugg:last-child { border-bottom: none; }
+.sugg:hover, .sugg.active { background: var(--surface-3); }
+.sugg.active { box-shadow: inset 3px 0 0 var(--accent); }   /* keyboard highlight */
+
+.sugg .ic { font-size: 16px; line-height: 1.35; flex-shrink: 0; }
+.sugg .t1 { font-size: 14.5px; font-weight: 600; }
+.sugg .t2 {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;   /* "…" */
+  max-width: 420px;
+}
+.sugg-note { padding: 10px 14px; font-size: 12.5px; color: var(--text-faint); }
+
+/* ⇅ swap button between A and B */
+.swap-btn {
+  display: block;
+  margin: -4px 0 8px auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: color var(--speed), border-color var(--speed);
+}
+.swap-btn:hover { color: var(--accent-2); border-color: var(--accent); }
+
+/* --- surge slider --- */
+.surge-label { margin-top: 16px; }
+.surge-value { color: var(--accent-2); font-weight: 800; }
+
+input[type="range"] {
+  width: 100%;
+  margin: 8px 0 0;
+  accent-color: var(--accent);   /* one line colours the slider in modern browsers */
+  height: 6px;
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   5. BANNER (estimates warning / preview notice)
+   ========================================================================== */
+.banner {
+  background: linear-gradient(180deg, #2b2210, #241c0e);
+  border: 1px solid #4d3c14;
+  color: var(--warn);
+  font-size: 12.5px;
+  padding: 11px 13px;
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+.banner.info {
+  background: linear-gradient(180deg, #10222c, #0d1c24);
+  border-color: #14404d;
+  color: #9fd8ea;
+}
+
+
+/* ==========================================================================
+   6. RESULT ROWS — one card per ride option
+   ========================================================================== */
+.row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid #444;          /* app colour is set inline by app.js */
+  border-radius: var(--radius);
+  padding: 13px 15px;
+  margin-bottom: 10px;
+  animation: fade-up .25s ease-out both;
+  transition: transform var(--speed), border-color var(--speed);
+}
+.row:hover { transform: translateY(-1px); border-color: var(--surface-3); }
+
+/* the cheapest option gets a soft green glow */
+#results > .row:nth-child(2) {   /* child 1 = route header card, child 2 = cheapest row */
+  background: linear-gradient(180deg, rgba(74, 222, 128, .07), transparent 60%), var(--surface);
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, .25), var(--shadow);
+}
+
+.row .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.row .name { font-weight: 700; font-size: 15.5px; }
+.row .price {
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;   /* digits line up neatly */
+}
+.row .meta { color: var(--text-dim); font-size: 12.5px; margin-top: 3px; }
+
+/* "Saves ₹X" line (a div, not the log-form button — hence div.save) */
+.row div.save  { color: var(--good); font-size: 13px; margin-top: 6px; font-weight: 600; }
+.row .extra    { color: var(--bad);  font-size: 13px; margin-top: 6px; }
+.night-note    { color: var(--brain); font-size: 12.5px; margin-top: 4px; }
+
+.row .learned {
+  display: inline-block;
+  color: var(--brain);
+  font-size: 12.5px;
+  margin-top: 6px;
+  background: #1d1630;
+  border: 1px solid #33254d;
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-bottom: 7px;
+  background: var(--good);
+  color: #062b14;
+}
+.badge.grey { background: var(--surface-3); color: var(--text-dim); }
+
+
+/* ==========================================================================
+   7. BUTTONS
+   ========================================================================== */
+/* big orange "Compare prices →" */
+.go {
+  width: 100%;
+  margin-top: 16px;
+  padding: 15px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--accent-ink);
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(255, 122, 24, .28);
+  transition: transform var(--speed), box-shadow var(--speed), filter var(--speed);
+}
+.go:hover  { filter: brightness(1.05); box-shadow: 0 10px 28px rgba(255, 122, 24, .38); }
+.go:active { transform: scale(.98); }
+
+/* the two buttons under each result */
+.row-btns { display: flex; gap: 8px; margin-top: 11px; }
+
+.open, .log-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background var(--speed), transform var(--speed), border-color var(--speed);
+}
+.open:active, .log-btn:active { transform: scale(.97); }
+
+.open {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.open:hover { background: #2f3a48; }
+.open:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.log-btn {
+  background: transparent;
+  border: 1px dashed #3a4656;
+  color: var(--text-dim);
+}
+.log-btn:hover { border-color: var(--good); color: var(--good); }
+
+/* red "Delete all" */
+.danger {
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid #4d2020;
+  color: var(--bad);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--speed);
+}
+.danger:hover { background: rgba(255, 107, 107, .08); }
+
+
+/* ==========================================================================
+   8. LOG FORM (inside a row) & PRICE LOG LIST
+   ========================================================================== */
+.logform {
+  margin-top: 11px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: drop-in .15s ease-out;
+}
+.logform label { margin-bottom: 7px; }
+
+.logform input[type="number"] {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  font-size: 16px;
+  transition: border-color var(--speed), box-shadow var(--speed);
+}
+.logform input[type="number"]:focus {
+  outline: none;
+  border-color: var(--good);
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, .14);
+}
+
+.logform-btns { display: flex; gap: 8px; margin-top: 9px; }
+.logform-btns button {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.logform button.save   { background: var(--good); color: #062b14; border: none; }
+.logform button.save:hover { filter: brightness(1.07); }
+.logform button.cancel { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+
+/* --- each logged trip --- */
+.log-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12.5px;
+}
+.log-item:first-child { border-top: none; }
+.log-item .l-left  { color: var(--text-dim); min-width: 0; }
+.log-item .l-left b { color: var(--text); font-size: 13.5px; }
+.log-item .l-right { text-align: right; white-space: nowrap; color: var(--text-dim); }
+
+.diff-good { color: var(--good); }
+.diff-bad  { color: var(--bad); }
+
+.del {
+  margin-left: 4px;
+  width: 24px; height: 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1;
+  transition: color var(--speed), border-color var(--speed);
+}
+.del:hover { color: var(--bad); border-color: var(--bad); }
+
+
+/* ==========================================================================
+   9. "HOW DOES THIS MATH WORK?" PANEL
+   ========================================================================== */
+details summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;          /* hide the default triangle… */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::after {     /* …and draw our own arrow */
+  content: "›";
+  font-size: 20px;
+  color: var(--text-faint);
+  transition: transform var(--speed);
+}
+details[open] summary::after { transform: rotate(90deg); }
+
+details p, details li { color: var(--text-dim); font-size: 13.5px; }
+details li { margin-bottom: 6px; }
+details ol { padding-left: 20px; margin-bottom: 0; }
+
+code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--accent-2);
+}
+
+
+/* ==========================================================================
+   10. HELPERS, ANIMATIONS & ACCESSIBILITY
+   ========================================================================== */
+.empty {
+  color: var(--text-faint);
+  font-size: 14px;
+  text-align: center;
+  padding: 26px 10px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
+}
+.hidden { display: none !important; }
+
+/* Keyboard users see a clear ring; mouse users don't get a stray outline. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.search-box input:focus-visible { outline: none; }   /* it already has a glow */
+
+/* Thin, dark scrollbars (suggestion list) */
+.suggestions::-webkit-scrollbar { width: 8px; }
+.suggestions::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 8px; }
+
+/* Animations: "keyframes" describe the start and end of a movement. */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes drop-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger the rows so they appear one after another */
+#results .row:nth-of-type(2)  { animation-delay: .03s; }
+#results .row:nth-of-type(3)  { animation-delay: .06s; }
+#results .row:nth-of-type(4)  { animation-delay: .09s; }
+#results .row:nth-of-type(5)  { animation-delay: .12s; }
+#results .row:nth-of-type(n+6) { animation-delay: .15s; }
+
+/* Respect people who turn off motion in their phone settings */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Small phones: tighten spacing, stack the two row buttons */
+@media (max-width: 380px) {
+  body { padding: 14px 10px 40px; }
+  h1 { font-size: 24px; }
+  .card { padding: 13px; }
+  .row .price { font-size: 19px; }
+  .row-btns { flex-direction: column; }
+  .log-item { flex-direction: column; }
+  .log-item .l-right { text-align: left; }
+}
